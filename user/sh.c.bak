@@ -133,9 +133,9 @@ runcmd(struct cmd *cmd)
 int
 getcmd(char *buf, int nbuf)
 {
-  fprintf(2, "$ ");      //将字符串输出到标准错误流中,成功返回写的字符个数,失败返回EOF(即-1）
-  memset(buf, 0, nbuf); //将指针变量buf所指向的前nbuf个字节的内存单元都用一个整数0替换
-  gets(buf, nbuf);      //从输入流中读取一个字符串，并保存到指针buf所指向的内存单元
+  fprintf(2, "$ ");
+  memset(buf, 0, nbuf);
+  gets(buf, nbuf);
   if(buf[0] == 0) // EOF
     return -1;
   return 0;
@@ -144,10 +144,10 @@ getcmd(char *buf, int nbuf)
 int
 main(void)
 {
-  static char buf[100]; //用static修饰的变量在程序开始时就在DS上分配空间，直到程序结束才会Delete
+  static char buf[100];
   int fd;
 
-  // Ensure that three file descriptors are open.[确保打开0,1,2这三个文件描述符]
+  // Ensure that three file descriptors are open.
   while((fd = open("console", O_RDWR)) >= 0){
     if(fd >= 3){
       close(fd);
@@ -156,15 +156,15 @@ main(void)
   }
 
   // Read and run input commands.
-  while(getcmd(buf, sizeof(buf)) >= 0){ //如果用户有输入
-    if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){ //如果用户输入的前3个字符是"cd "(即用户要切换目录)
+  while(getcmd(buf, sizeof(buf)) >= 0){
+    if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
-      buf[strlen(buf)-1] = 0;  // chop \n [把字符串最后的换行符'\n' 截掉]
-      if(chdir(buf+3) < 0)   //切换目录(chdir函数成功返回0, 失败返回-1)
+      buf[strlen(buf)-1] = 0;  // chop \n
+      if(chdir(buf+3) < 0)
         fprintf(2, "cannot cd %s\n", buf+3);
-      continue; //继续等待用户的输入
+      continue;
     }
-    if(fork1() == 0)  //用户不需要切换目录，就调用fork1函数,fork一个子进程
+    if(fork1() == 0)
       runcmd(parsecmd(buf));
     wait(0);
   }
