@@ -9,7 +9,7 @@ fmtname(char *path)
   static char buf[DIRSIZ+1];
   char *p;
 
-  // Find first character after last slash.
+  // Find first character after last slash from the right end of the string "path"(from right to left)
   for(p=path+strlen(path); p >= path && *p != '/'; p--)
     ;
   p++;
@@ -17,8 +17,8 @@ fmtname(char *path)
   // Return blank-padded name.
   if(strlen(p) >= DIRSIZ)
     return p;
-  memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  memmove(buf, p, strlen(p));  //void *memmove(void *str1, const void *str2, size_t n) : copies n bytes from str2 to str1, and returns str1.
+  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));  //void *memset(void *str, int c, size_t n): copies the character c (an unsigned char) to the first n bytes of the str pointed to.
   return buf;
 }
 
@@ -27,15 +27,15 @@ ls(char *path)
 {
   char buf[512], *p;
   int fd;
-  struct dirent de;   //struct dirent is defined in fs.h, items include inode number and name of the dir
-  struct stat st;     //struct stat is defined in stat.h, items include disk device,Inode number,file type,links and size
+  struct dirent de;   //struct dirent is defined in fs.h. Its items include： inum and name[DIRSIZ]
+  struct stat st;     //struct stat is defined in stat.h, Its items include： dev,ino,type,nlink and size
 
   if((fd = open(path, 0)) < 0){   
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
 
-  if(fstat(fd, &st) < 0){  // fstat is a system call used to determine file info based on its file descriptor.
+  if(fstat(fd, &st) < 0){  //int fstat(int fd, struct stat *buf) : get file info based on its file descriptor. It returns a negative value on failure.
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
     return;
