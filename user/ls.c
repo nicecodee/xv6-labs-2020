@@ -41,7 +41,7 @@ ls(char *path)
     return;
   }
 
-  switch(st.type){
+  switch(st.type){  // st.type is defined in stat.h and it includes 1:T_DIR, 2:T_FILE and 3:T_DEVICE
   case T_FILE:
     printf("%s %d %d %l\n", fmtname(path), st.type, st.ino, st.size);
     break;
