@@ -54,8 +54,8 @@ ls(char *path)
     strcpy(buf, path);  // copy the string pointed by path (including the null character) to the buf.
     p = buf+strlen(buf);
     *p++ = '/';
-    while(read(fd, &de, sizeof(de)) == sizeof(de)){ // ssize_t read(int fd, void *buf, size_t nbytes): read data from fd into a buffer.
-      if(de.inum == 0)  //0 indicates no inode. Most file system by convention use #1 as the root inode's  inode number. 
+    while(read(fd, &de, sizeof(de)) == sizeof(de)){ //read the fd by the size of de (i.e. the size of one dir entry) each time, the subsequent read will start from the offset of last read
+      if(de.inum == 0)  //de.inum==0 indicates no file exists in this dir. By convention most file system  use #1 as the root inode's  inode number. 
         continue;
       memmove(p, de.name, DIRSIZ); //void *memmove(void *str1, const void *str2, size_t n) : copies n bytes from str2 to str1, and returns str1.
       p[DIRSIZ] = 0;
