@@ -30,7 +30,7 @@ ls(char *path)
   struct dirent de;   //struct dirent is defined in fs.h. Its items include： inum and name[DIRSIZ]
   struct stat st;     //struct stat is defined in stat.h, Its items include： dev,ino,type,nlink and size
 
-  if((fd = open(path, 0)) < 0){   
+  if((fd = open(path, 0)) < 0){ // the "0" argument in open() indicates read data with the "O_RDONLY" flag
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
