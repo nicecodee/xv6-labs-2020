@@ -27,15 +27,15 @@ ls(char *path)
 {
   char buf[512], *p;
   int fd;
-  struct dirent de;
-  struct stat st;
+  struct dirent de;   //struct dirent is defined in fs.h, items include inode number and name of the dir
+  struct stat st;     //struct stat is defined in stat.h, items include disk device,Inode number,file type,links and size
 
-  if((fd = open(path, 0)) < 0){
+  if((fd = open(path, 0)) < 0){   
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
 
-  if(fstat(fd, &st) < 0){
+  if(fstat(fd, &st) < 0){  // fstat is a system call used to determine file info based on its file descriptor.
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
     return;
@@ -47,19 +47,19 @@ ls(char *path)
     break;
 
   case T_DIR:
-    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
+    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){  //DIRSIZ is defined to be 14 in fs.h
       printf("ls: path too long\n");
       break;
     }
-    strcpy(buf, path);
+    strcpy(buf, path);  // copy the string pointed by path (including the null character) to the buf.
     p = buf+strlen(buf);
     *p++ = '/';
-    while(read(fd, &de, sizeof(de)) == sizeof(de)){
+    while(read(fd, &de, sizeof(de)) == sizeof(de)){ // ssize_t read(int fd, void *buf, size_t nbytes);
       if(de.inum == 0)
         continue;
-      memmove(p, de.name, DIRSIZ);
+      memmove(p, de.name, DIRSIZ); //void *memmove(void *str1, const void *str2, size_t n) : copies n bytes from str2 to str1, and returns str1.
       p[DIRSIZ] = 0;
-      if(stat(buf, &st) < 0){
+      if(stat(buf, &st) < 0){  //int stat(const char *path, struct stat *buf): get file info based on its file path. It returns a negative value on failure.
         printf("ls: cannot stat %s\n", buf);
         continue;
       }
