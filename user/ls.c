@@ -25,7 +25,7 @@ fmtname(char *path)
 void
 ls(char *path)
 {
-  char buf[512], *p;
+  char buf[512], *p;  // buf 用来存储路径
   int fd;
   struct dirent de;   //struct dirent is defined in fs.h. Its items include： inum and name[DIRSIZ]
   struct stat st;     //struct stat is defined in stat.h, Its items include： dev,ino,type,nlink and size
@@ -47,16 +47,24 @@ ls(char *path)
     break;
 
   case T_DIR:
-    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){ // 限制路径 path 的长度防止缓存溢出，不是很重要可以忽略
+    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){ // 限制路径 path 的长度防止缓存溢出
       printf("ls: path too long\n");
       break;
     }
+     // 将当前路径存入 buf 中，并在最后加入 '/' 为重复构建子路径作准备
+    // 注意，完成以下3行操作后， buf 包括：当前路径 + '/'，p 指向 '/' 的下一位
     strcpy(buf, path);  // copy the string pointed by path (including the null character) to the buf.
-    p = buf+strlen(buf);   // 指针 p 定位到 buf 的最后
-    *p++ = '/';   // 在 buf 的最后位置添加 "/"
+    p = buf+strlen(buf);   
+    *p++ = '/';   
     while(read(fd, &de, sizeof(de)) == sizeof(de)){ //read the fd by the size of de (i.e. the size of one dir entry) each time, the subsequent read will start from the offset of last read
       if(de.inum == 0)  //de.inum==0 indicates no file exists in this dir. inum == 0 说明无效文件或目录
         continue;
+      /*
+       * de.name 表示该文件的文件名（可能是 "."（当前目录）， ".."（上层目录））
+       * 这里主要是将 de 的 name 复制到 p 指向的位置，与当前路径合并作为该文件的完整路径，并在最后加 '0' 构建字符串
+       * 注意由于这里 p 的位置没有变动，所以下一次循环重复复制后就可以保持当前路径只更新文件名了
+       * 这也是为什么末尾要补 '0' 提示字符串终止位置的原因之一。
+       */
       memmove(p, de.name, DIRSIZ); //void *memmove(void *str1, const void *str2, size_t n) : // 将 de.name 拷贝到 p 中
       p[DIRSIZ] = 0;
       if(stat(buf, &st) < 0){  //int stat(const char *path, struct stat *buf): get file info based on its file path. It returns a negative value on failure.
