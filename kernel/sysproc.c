@@ -95,3 +95,14 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_trace(void)
+{
+  int mask;
+  if(argint(0, &mask) < 0) // get the 'mask' argument from the trapframe of the process
+    return -1;
+  
+  myproc()->mask = mask;  // save argv[1] as the mask of current process
+  return 0;
+}
